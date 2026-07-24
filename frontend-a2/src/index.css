@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@layer components {
+  .polje {
+    @apply bg-[#1A2332] border border-white/10 rounded-sm px-4 py-3 text-sm
+           placeholder:text-[#8B93A6] focus:outline-none focus:border-[#C9A227]/60;
+  }
+}

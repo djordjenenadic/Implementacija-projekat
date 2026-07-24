@@ -1,0 +1,175 @@
+{
+  "id": "bd4b3e14-b068-4b7c-8cd1-2ce1376e831b",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.kupovinaKarte": {
+      "name": "kupovinaKarte",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "kupovinaKarte_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "idKarte": {
+          "name": "idKarte",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sifraKarte": {
+          "name": "sifraKarte",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datumKupovine": {
+          "name": "datumKupovine",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "kupovinaKarte_idKarte_unique": {
+          "name": "kupovinaKarte_idKarte_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "idKarte"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.stavkaKupovine": {
+      "name": "stavkaKupovine",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "stavkaKupovine_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "idKupovine": {
+          "name": "idKupovine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idUtakmice": {
+          "name": "idUtakmice",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "stavkaKupovine_idKupovine_kupovinaKarte_id_fk": {
+          "name": "stavkaKupovine_idKupovine_kupovinaKarte_id_fk",
+          "tableFrom": "stavkaKupovine",
+          "tableTo": "kupovinaKarte",
+          "columnsFrom": [
+            "idKupovine"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "stavkaKupovine_idUtakmice_utakmicaRef_idUtakmice_fk": {
+          "name": "stavkaKupovine_idUtakmice_utakmicaRef_idUtakmice_fk",
+          "tableFrom": "stavkaKupovine",
+          "tableTo": "utakmicaRef",
+          "columnsFrom": [
+            "idUtakmice"
+          ],
+          "columnsTo": [
+            "idUtakmice"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.utakmicaRef": {
+      "name": "utakmicaRef",
+      "schema": "",
+      "columns": {
+        "idUtakmice": {
+          "name": "idUtakmice",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumOdigravanja": {
+          "name": "datumOdigravanja",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

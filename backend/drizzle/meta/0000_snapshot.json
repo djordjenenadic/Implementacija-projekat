@@ -1,0 +1,85 @@
+{
+  "id": "ea224617-0021-4b28-afe1-8bab01971697",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.prvenstvo": {
+      "name": "prvenstvo",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "prvenstvo_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lokacija": {
+          "name": "lokacija",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumPocetka": {
+          "name": "datumPocetka",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumZavrsetka": {
+          "name": "datumZavrsetka",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opis": {
+          "name": "opis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datumPopustaDo": {
+          "name": "datumPopustaDo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

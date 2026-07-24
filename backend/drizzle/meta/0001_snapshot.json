@@ -1,0 +1,750 @@
+{
+  "id": "675a73d8-a760-4f5a-a267-030696b018d6",
+  "prevId": "ea224617-0021-4b28-afe1-8bab01971697",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.grupa": {
+      "name": "grupa",
+      "schema": "",
+      "columns": {
+        "idGrupa": {
+          "name": "idGrupa",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "grupa_idGrupa_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idPrvenstva": {
+          "name": "idPrvenstva",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "grupa_idPrvenstva_prvenstvo_id_fk": {
+          "name": "grupa_idPrvenstva_prvenstvo_id_fk",
+          "tableFrom": "grupa",
+          "tableTo": "prvenstvo",
+          "columnsFrom": [
+            "idPrvenstva"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.karta": {
+      "name": "karta",
+      "schema": "",
+      "columns": {
+        "idKarta": {
+          "name": "idKarta",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "karta_idKarta_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "sifra": {
+          "name": "sifra",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ime": {
+          "name": "ime",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prezime": {
+          "name": "prezime",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adresa1": {
+          "name": "adresa1",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "postanskiBroj": {
+          "name": "postanskiBroj",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mesto": {
+          "name": "mesto",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "drzava": {
+          "name": "drzava",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emailPotvrdjen": {
+          "name": "emailPotvrdjen",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'na_cekanju'"
+        },
+        "ukupnaCena": {
+          "name": "ukupnaCena",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kursNaDanKupovine": {
+          "name": "kursNaDanKupovine",
+          "type": "numeric(10, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idValute": {
+          "name": "idValute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumKreiranja": {
+          "name": "datumKreiranja",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "karta_idValute_valuta_idValute_fk": {
+          "name": "karta_idValute_valuta_idValute_fk",
+          "tableFrom": "karta",
+          "tableTo": "valuta",
+          "columnsFrom": [
+            "idValute"
+          ],
+          "columnsTo": [
+            "idValute"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "karta_sifra_unique": {
+          "name": "karta_sifra_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sifra"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.koriscenjePromoKoda": {
+      "name": "koriscenjePromoKoda",
+      "schema": "",
+      "columns": {
+        "idPromoKoda": {
+          "name": "idPromoKoda",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kartaIskoristilaId": {
+          "name": "kartaIskoristilaId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "koriscenjePromoKoda_idPromoKoda_promoKod_idPromoKod_fk": {
+          "name": "koriscenjePromoKoda_idPromoKoda_promoKod_idPromoKod_fk",
+          "tableFrom": "koriscenjePromoKoda",
+          "tableTo": "promoKod",
+          "columnsFrom": [
+            "idPromoKoda"
+          ],
+          "columnsTo": [
+            "idPromoKod"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "koriscenjePromoKoda_kartaIskoristilaId_karta_idKarta_fk": {
+          "name": "koriscenjePromoKoda_kartaIskoristilaId_karta_idKarta_fk",
+          "tableFrom": "koriscenjePromoKoda",
+          "tableTo": "karta",
+          "columnsFrom": [
+            "kartaIskoristilaId"
+          ],
+          "columnsTo": [
+            "idKarta"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "koriscenjePromoKoda_kartaIskoristilaId_unique": {
+          "name": "koriscenjePromoKoda_kartaIskoristilaId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "kartaIskoristilaId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.promoKod": {
+      "name": "promoKod",
+      "schema": "",
+      "columns": {
+        "idPromoKod": {
+          "name": "idPromoKod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "promoKod_idPromoKod_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "kod": {
+          "name": "kod",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iskoriscen": {
+          "name": "iskoriscen",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "kartaGenerisalaId": {
+          "name": "kartaGenerisalaId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "promoKod_kartaGenerisalaId_karta_idKarta_fk": {
+          "name": "promoKod_kartaGenerisalaId_karta_idKarta_fk",
+          "tableFrom": "promoKod",
+          "tableTo": "karta",
+          "columnsFrom": [
+            "kartaGenerisalaId"
+          ],
+          "columnsTo": [
+            "idKarta"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "promoKod_kod_unique": {
+          "name": "promoKod_kod_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "kod"
+          ]
+        },
+        "promoKod_kartaGenerisalaId_unique": {
+          "name": "promoKod_kartaGenerisalaId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "kartaGenerisalaId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.prvenstvo": {
+      "name": "prvenstvo",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "prvenstvo_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lokacija": {
+          "name": "lokacija",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumPocetka": {
+          "name": "datumPocetka",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "datumZavrsetka": {
+          "name": "datumZavrsetka",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opis": {
+          "name": "opis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datumPopustaDo": {
+          "name": "datumPopustaDo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.stadion": {
+      "name": "stadion",
+      "schema": "",
+      "columns": {
+        "idStadion": {
+          "name": "idStadion",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "stadion_idStadion_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lokacija": {
+          "name": "lokacija",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kapacitet": {
+          "name": "kapacitet",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.stavkaKarte": {
+      "name": "stavkaKarte",
+      "schema": "",
+      "columns": {
+        "idKarte": {
+          "name": "idKarte",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idUtakmice": {
+          "name": "idUtakmice",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cena": {
+          "name": "cena",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "popustPrimenjen": {
+          "name": "popustPrimenjen",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "stavkaKarte_idKarte_karta_idKarta_fk": {
+          "name": "stavkaKarte_idKarte_karta_idKarta_fk",
+          "tableFrom": "stavkaKarte",
+          "tableTo": "karta",
+          "columnsFrom": [
+            "idKarte"
+          ],
+          "columnsTo": [
+            "idKarta"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "stavkaKarte_idUtakmice_utakmica_idUtakmica_fk": {
+          "name": "stavkaKarte_idUtakmice_utakmica_idUtakmica_fk",
+          "tableFrom": "stavkaKarte",
+          "tableTo": "utakmica",
+          "columnsFrom": [
+            "idUtakmice"
+          ],
+          "columnsTo": [
+            "idUtakmica"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "stavkaKarte_idKarte_idUtakmice_pk": {
+          "name": "stavkaKarte_idKarte_idUtakmice_pk",
+          "columns": [
+            "idKarte",
+            "idUtakmice"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tim": {
+      "name": "tim",
+      "schema": "",
+      "columns": {
+        "idTim": {
+          "name": "idTim",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "tim_idTim_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idGrupe": {
+          "name": "idGrupe",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tim_idGrupe_grupa_idGrupa_fk": {
+          "name": "tim_idGrupe_grupa_idGrupa_fk",
+          "tableFrom": "tim",
+          "tableTo": "grupa",
+          "columnsFrom": [
+            "idGrupe"
+          ],
+          "columnsTo": [
+            "idGrupa"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.utakmica": {
+      "name": "utakmica",
+      "schema": "",
+      "columns": {
+        "idUtakmica": {
+          "name": "idUtakmica",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "utakmica_idUtakmica_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "datum": {
+          "name": "datum",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vreme": {
+          "name": "vreme",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cenaKarte": {
+          "name": "cenaKarte",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idStadiona": {
+          "name": "idStadiona",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tim1Id": {
+          "name": "tim1Id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tim2Id": {
+          "name": "tim2Id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "utakmica_idStadiona_stadion_idStadion_fk": {
+          "name": "utakmica_idStadiona_stadion_idStadion_fk",
+          "tableFrom": "utakmica",
+          "tableTo": "stadion",
+          "columnsFrom": [
+            "idStadiona"
+          ],
+          "columnsTo": [
+            "idStadion"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "utakmica_tim1Id_tim_idTim_fk": {
+          "name": "utakmica_tim1Id_tim_idTim_fk",
+          "tableFrom": "utakmica",
+          "tableTo": "tim",
+          "columnsFrom": [
+            "tim1Id"
+          ],
+          "columnsTo": [
+            "idTim"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "utakmica_tim2Id_tim_idTim_fk": {
+          "name": "utakmica_tim2Id_tim_idTim_fk",
+          "tableFrom": "utakmica",
+          "tableTo": "tim",
+          "columnsFrom": [
+            "tim2Id"
+          ],
+          "columnsTo": [
+            "idTim"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.valuta": {
+      "name": "valuta",
+      "schema": "",
+      "columns": {
+        "idValute": {
+          "name": "idValute",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "valuta_idValute_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "naziv": {
+          "name": "naziv",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kod": {
+          "name": "kod",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktivna": {
+          "name": "aktivna",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
