@@ -98,7 +98,7 @@ export class KartaConsumer implements OnModuleInit {
   return;
 }
 
-    // 2. Proveri da li rani popust (10%) važi
+   try{ // 2. Proveri da li rani popust (10%) važi
     const [prvenstvo] = await this.db.select().from(schema.prvenstvo).limit(1);
     const popustAktivan = prvenstvo?.datumPopustaDo
       ? new Date() <= new Date(prvenstvo.datumPopustaDo)
@@ -201,6 +201,7 @@ export class KartaConsumer implements OnModuleInit {
   sifra,
   noviPromoKod,
   idKarte: novaKarta.idKarta,
+  
 }), 'EX', 3600);
 
    // 11. Objavi događaj za A.2 portal — sa punim podacima o utakmicama, ne samo ID-jevima
@@ -227,8 +228,15 @@ await this.redis.xadd(
 );
 
     this.logger.log(`Karta kreirana: ${sifra} (id ${novaKarta.idKarta})`);
-
+   }
+   catch (err) {
+      this.logger.error(`Greška pri obradi poruke ${idPoruke}:`, err);
+      await this.redis.set(kljucStatusa(idPoruke), JSON.stringify({
+        status: 'greska',
+        poruka: 'Došlo je do greške prilikom obrade kupovine. Pokušajte ponovo.',
+      }), 'EX', 3600);}
+      finally{
     // 12. Potvrdi da je poruka uspešno obrađena
-    await this.redis.xack(STREAM_KUPOVINE, GRUPA, idPoruke);
+    await this.redis.xack(STREAM_KUPOVINE, GRUPA, idPoruke);}
   }
 }

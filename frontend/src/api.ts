@@ -2,6 +2,7 @@ import type { KreirajKupovinuDto,StatusKupovine,Prvenstvo, Grupa, Tim, Stadion, 
 
 const API_URL = 'http://localhost:3000'
 
+//fetch pozivi:
 async function get<T>(putanja: string): Promise<T> {
   const odgovor = await fetch(`${API_URL}${putanja}`)
   return odgovor.json()
@@ -25,10 +26,10 @@ async function patch<T>(putanja: string, telo: unknown): Promise<T> {
   return odgovor.json()
 }
 
-async function del(putanja: string): Promise<void> {
+/*async function del(putanja: string): Promise<void> {
   await fetch(`${API_URL}${putanja}`, { method: 'DELETE' })
-}
-
+}*/
+//************************************************* */
 // Prvenstvo
 export async function dohvatiPrvenstvo(): Promise<Prvenstvo> {
   const sva = await get<Prvenstvo[]>('/prvenstvo')

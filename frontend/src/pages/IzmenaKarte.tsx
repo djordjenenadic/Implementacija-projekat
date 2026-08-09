@@ -52,7 +52,9 @@ function IzmenaKarte() {
   }
 
   const pocetneUtakmiceId = karta?.stavke.map((s) => s.idUtakmice) ?? []
-
+ const osnovnaCena = utakmice
+    .filter((u) => odabraneUtakmice.includes(u.idUtakmica))
+    .reduce((zbir, u) => zbir + Number(u.cenaKarte), 0)
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 text-[#F4F1E9]">
       <h1 className="text-3xl font-black uppercase mb-2">Izmena karte</h1>
@@ -95,7 +97,12 @@ function IzmenaKarte() {
               )
             })}
           </div>
-
+<div className="border-t border-white/10 pt-4 mb-4">
+  <div className="flex justify-between text-lg font-black">
+    <span>Nova ukupna cena</span>
+    <span className="font-mono text-[#C9A227]">{osnovnaCena.toFixed(2)} € (po originalnom kursu)</span>
+  </div>
+</div>
           {greska && <p className="text-red-400 text-xs mb-4">{greska}</p>}
 
           <button onClick={sacuvajIzmene} disabled={odabraneUtakmice.length === 0}

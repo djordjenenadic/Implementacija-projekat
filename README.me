@@ -1,0 +1,46 @@
+# Sistem za prodaju karata — Svetsko prvenstvo u košarci, Katar 2027
+
+Sistem se sastoji iz dve nezavisne aplikacije:
+- **A.1** — prodaja karata (kupovina, izmena, otkazivanje, administracija)
+- **A.2** — portal za izveštavanje (statistika prodaje u realnom vremenu)
+
+## Pokretanje
+
+Potreban je samo instaliran i pokrenut Docker Desktop
+
+Iz korenog foldera projekta:
+
+```bash
+docker compose up --build
+```
+
+Prvo pokretanje traje nekoliko minuta (izgradnja slika, instalacija paketa unutar kontejnera). Kada se u terminalu pojave poruke `Nest application successfully started` za oba backend servisa, sistem je spreman.
+
+## Pristup aplikacijama
+
+| Aplikacija | Adresa |
+|---|---|
+| A.1 — Prodaja karata | http://localhost:5173 |
+| A.2 — Portal za izveštavanje | http://localhost:5174 |
+
+## Napomene
+
+- Baza podataka i test podaci (seed) se automatski postavljaju pri svakom pokretanju backend kontejnera — nije potrebna nikakva ručna migracija.
+- Svako sledeće pokretanje (bez izmene koda) dovoljno je pokrenuti bez `--build`:
+
+```bash
+docker compose up
+```
+
+- Gašenje svih servisa:
+
+```bash
+docker compose down
+```
+
+## Arhitektura
+
+- Backend: NestJS + TypeScript + Drizzle ORM
+- Frontend: React + TypeScript (Vite)
+- Baza podataka: PostgreSQL (odvojene baze za A.1 i A.2)
+- Redis: keširanje (A.1) i message queue (Redis Streams) za asinhronu obradu kupovine i sinhronizaciju A.1 i A.2

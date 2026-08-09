@@ -20,17 +20,17 @@ const praznaForma: PodaciKupca = {
 }
 
 function KupovinaKarte() {
-  const [ucitavanje, setUcitavanje] = useState(true)
-  const [utakmice, setUtakmice] = useState<UtakmicaBackend[]>([])
-  const [timovi, setTimovi] = useState<Tim[]>([])
-  const [valute, setValute] = useState<ValutaBackend[]>([])
-  const [prvenstvo, setPrvenstvo] = useState<Prvenstvo | null>(null)
+  const [ucitavanje, setUcitavanje] = useState(true)//postavljanje pocetne vrednosti na true
+  const [utakmice, setUtakmice] = useState<UtakmicaBackend[]>([])//postavljanje tipa podataka na UtakmiceBackedn i postavljanje poctene vrednosti [] 
+  const [timovi, setTimovi] = useState<Tim[]>([]) //postavljanje pocetne vrendosti []
+  const [valute, setValute] = useState<ValutaBackend[]>([]) //postavljanje pocetne vrensoti []
+  const [prvenstvo, setPrvenstvo] = useState<Prvenstvo | null>(null)//prvenstvo je tipa Prvenstvo ilo null, i postavljamo na null pocetnu vrednost
 
   const [korak, setKorak] = useState<Korak>('podaci')
-  const [podaci, setPodaci] = useState<PodaciKupca>(praznaForma)
-  const [odabraneUtakmice, setOdabraneUtakmice] = useState<number[]>([])
+  const [podaci, setPodaci] = useState<PodaciKupca>(praznaForma)//Prikupljanje podataka o kupcu sa frome, podrayumevano forma sa praynim poljima
+  const [odabraneUtakmice, setOdabraneUtakmice] = useState<number[]>([])//number, jer pamtimo id
   const [promoKod, setPromoKod] = useState('')
-  const [promoKodPrimenjen, setPromoKodPrimenjen] = useState(false)
+  const [promoKodPrimenjen, setPromoKodPrimenjen] = useState(false)//promoKodPrimenjen na false kao podrzumevano
   const [valutaId, setValutaId] = useState<number | null>(null)
   const [rezultat, setRezultat] = useState<{ sifra: string; noviPromoKod: string } | null>(null)
   const [porukaGreske, setPorukaGreske] = useState('')
@@ -38,12 +38,12 @@ function KupovinaKarte() {
   const [pretragaTima, setPretragaTima] = useState('')
 
   useEffect(() => {
-    Promise.all([dohvatiUtakmiceAdmin(), dohvatiTimove(), dohvatiValute(), dohvatiPrvenstvo()])
-      .then(([u, t, v, p]) => {
-        setUtakmice(u); setTimovi(t); setValute(v.filter((x) => x.aktivna)); setPrvenstvo(p)
-        if (v.length > 0) setValutaId(v.find((x) => x.aktivna)?.idValute ?? null)
+    Promise.all([dohvatiUtakmiceAdmin(), dohvatiTimove(), dohvatiValute(), dohvatiPrvenstvo()])//pokretanje sva cetiri pziva istovremeno, i ceka da se sva zavrse
+      .then(([u, t, v, p]) => {//u se odnosi na prvu funkciju, t na drugu i tako redom
+        setUtakmice(u); setTimovi(t); setValute(v.filter((x) => x.aktivna));setPrvenstvo(p)//prikayuje samo valute koje su dozvoljene 
+        if (v.length > 0) setValutaId(v.find((x) => x.aktivna)?.idValute ?? null)//ako je find pronasao nesto vrati idValute, u suprotnom null
       })
-      .finally(() => setUcitavanje(false))
+      .finally(() => setUcitavanje(false))//iyvrsava se uvek bey obyira da li je .then prosao uspseno ili ne
   }, [])
 
   function nazivTima(id: number) {

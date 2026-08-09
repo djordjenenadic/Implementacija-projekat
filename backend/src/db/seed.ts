@@ -8,12 +8,16 @@ async function main() {
   const db = drizzle(pool, { schema });
 
   console.log('Brišem postojeće podatke...');
-  await db.delete(schema.utakmica);
-  await db.delete(schema.tim);
-  await db.delete(schema.grupa);
-  await db.delete(schema.valuta);
-  await db.delete(schema.stadion);
-  await db.delete(schema.prvenstvo);
+await db.delete(schema.koriscenjePromoKoda);
+await db.delete(schema.promoKod);
+await db.delete(schema.stavkaKarte);  
+await db.delete(schema.karta);
+await db.delete(schema.utakmica);      
+await db.delete(schema.tim);
+await db.delete(schema.grupa);
+await db.delete(schema.stadion);
+await db.delete(schema.valuta);
+await db.delete(schema.prvenstvo);
 
   console.log('Ubacujem Prvenstvo...');
   const [prvenstvo] = await db.insert(schema.prvenstvo).values({

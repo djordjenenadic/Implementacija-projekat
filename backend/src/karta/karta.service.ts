@@ -107,20 +107,30 @@ export class KartaService {
       .where(eq(schema.karta.idKarta, karta.idKarta))
       .returning();
 
-   const utakmiceZaDogadjaj = noveUtakmice.map((u) => ({
-  idUtakmice: u.idUtakmica,
-  naziv: '', // po potrebi možemo dovući i nazive timova, po istom obrascu kao u konzumentu
-  datum: u.datum,
-}));
-
+  const utakmiceZaDogadjaj = await Promise.all(noveUtakmice.map(async (u) => {
+      const [tim1] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, u.tim1Id));
+      const [tim2] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, u.tim2Id));
+      return {
+        idUtakmice: u.idUtakmica,
+        naziv: `${tim1?.naziv ?? '?'} — ${tim2?.naziv ?? '?'}`,
+        datum: u.datum,
+      };
+    }));
+/*
 await this.redis.xadd(
   STREAM_DOGADJAJI_KARATA, '*',
   'tip', 'izmenjena_karta',
   'idKarte', String(karta.idKarta),
   'utakmice', JSON.stringify(utakmiceZaDogadjaj),
   'datum', new Date().toISOString(),
-);
+);*/
 
+
+await this.redis.xadd(STREAM_DOGADJAJI_KARATA, '*',
+  'tip', 'izmenjena_karta',
+  'idKarte', String(karta.idKarta),
+  'utakmice', JSON.stringify(utakmiceZaDogadjaj),
+  'datum', new Date().toISOString());
     return azurirana;
   }
 
