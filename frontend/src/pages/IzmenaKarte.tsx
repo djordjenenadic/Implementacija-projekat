@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { dohvatiUtakmiceAdmin, dohvatiTimove, pronadjiKartu, izmeniKartu } from '../api'
-import type { UtakmicaBackend, Tim, KartaBackend } from '../types'
+import { dohvatiUtakmiceAdmin, dohvatiTimove, pronadjiKartu, izmeniKartu, dohvatiPrvenstvo } from '../api'
+import type { UtakmicaBackend, Tim, KartaBackend,Prvenstvo } from '../types'
 
 function IzmenaKarte() {
   const [sifra, setSifra] = useState('')
@@ -12,27 +12,29 @@ function IzmenaKarte() {
 
   const [utakmice, setUtakmice] = useState<UtakmicaBackend[]>([])
   const [timovi, setTimovi] = useState<Tim[]>([])
-
+  const [prvenstvo, setPrvenstvo] = useState<Prvenstvo | null>(null)
   function nazivTima(id: number) {
     return timovi.find((t) => t.idTim === id)?.naziv ?? '—'
   }
 
   async function pretraziKartu() {
-    setGreska('')
-    try {
-      const [pronadjena, sveUtakmice, sviTimovi] = await Promise.all([
-        pronadjiKartu(sifra, email),
-        dohvatiUtakmiceAdmin(),
-        dohvatiTimove(),
-      ])
-      setKarta(pronadjena)
-      setUtakmice(sveUtakmice)
-      setTimovi(sviTimovi)
-      setOdabraneUtakmice(pronadjena.stavke.map((s) => s.idUtakmice))
-    } catch (e) {
-      setGreska(e instanceof Error ? e.message : 'Greška pri pretrazi.')
-    }
+  setGreska('')
+  try {
+    const [pronadjena, sveUtakmice, sviTimovi, prvenstvoPodaci] = await Promise.all([
+      pronadjiKartu(sifra, email),
+      dohvatiUtakmiceAdmin(),
+      dohvatiTimove(),
+      dohvatiPrvenstvo(),
+    ])
+    setKarta(pronadjena)
+    setUtakmice(sveUtakmice)
+    setTimovi(sviTimovi)
+    setPrvenstvo(prvenstvoPodaci)
+    setOdabraneUtakmice(pronadjena.stavke.map((s) => s.idUtakmice))
+  } catch (e) {
+    setGreska(e instanceof Error ? e.message : 'Greška pri pretrazi.')
   }
+}
 
   function preokreniUtakmicu(id: number) {
     setSacuvano(false)
@@ -51,10 +53,28 @@ function IzmenaKarte() {
     }
   }
 
-  const pocetneUtakmiceId = karta?.stavke.map((s) => s.idUtakmice) ?? []
+  /*const pocetneUtakmiceId = karta?.stavke.map((s) => s.idUtakmice) ?? []
  const osnovnaCena = utakmice
     .filter((u) => odabraneUtakmice.includes(u.idUtakmica))
-    .reduce((zbir, u) => zbir + Number(u.cenaKarte), 0)
+    .reduce((zbir, u) => zbir + Number(u.cenaKarte), 0)*/
+    const pocetneUtakmiceId = karta?.stavke.map((s) => s.idUtakmice) ?? []
+
+const dodateUtakmice = utakmice.filter((u) =>
+  odabraneUtakmice.includes(u.idUtakmica) && !pocetneUtakmiceId.includes(u.idUtakmica)
+)
+const uklonjeneUtakmice = utakmice.filter((u) =>
+  pocetneUtakmiceId.includes(u.idUtakmica) && !odabraneUtakmice.includes(u.idUtakmica)
+)
+
+const popustAktivan = !!(prvenstvo?.datumPopustaDo && new Date() <= new Date(prvenstvo.datumPopustaDo))
+
+const osnovnaCenaDodatih = dodateUtakmice.reduce((zbir, u) => zbir + Number(u.cenaKarte), 0)
+const cenaDodatihNakonPopusta = popustAktivan ? osnovnaCenaDodatih * 0.9 : osnovnaCenaDodatih
+
+const osnovnaCenaUklonjenih = uklonjeneUtakmice.reduce((zbir, u) => zbir + Number(u.cenaKarte), 0)
+const cenaUklonjenihNakonPopusta = popustAktivan ? osnovnaCenaUklonjenih * 0.9 : osnovnaCenaUklonjenih
+
+const imaIzmena = dodateUtakmice.length > 0 || uklonjeneUtakmice.length > 0
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 text-[#F4F1E9]">
       <h1 className="text-3xl font-black uppercase mb-2">Izmena karte</h1>
@@ -97,15 +117,40 @@ function IzmenaKarte() {
               )
             })}
           </div>
-<div className="border-t border-white/10 pt-4 mb-4">
-  <div className="flex justify-between text-lg font-black">
-    <span>Nova ukupna cena</span>
-    <span className="font-mono text-[#C9A227]">{osnovnaCena.toFixed(2)} € (po originalnom kursu)</span>
+{imaIzmena ? (
+  <div className="border-t border-white/10 pt-4 mb-4 space-y-2 text-sm">
+    {dodateUtakmice.length > 0 && (
+      <>
+        <div className="flex justify-between text-[#8B93A6]">
+          <span>Cena dodatih utakmica ({dodateUtakmice.length})</span>
+          <span className="font-mono">{osnovnaCenaDodatih.toFixed(2)} €</span>
+        </div>
+        {popustAktivan && (
+          <div className="flex justify-between text-[#8B93A6]">
+            <span>Rani popust (10%)</span>
+            <span className="font-mono">-{(osnovnaCenaDodatih * 0.1).toFixed(2)} €</span>
+          </div>
+        )}
+        <div className="flex justify-between font-black">
+          <span>Dodatno zaduženje</span>
+          <span className="font-mono text-[#C9A227]">+{cenaDodatihNakonPopusta.toFixed(2)} €</span>
+        </div>
+      </>
+    )}
+    {uklonjeneUtakmice.length > 0 && (
+      <div className="flex justify-between font-black pt-2">
+        <span>Umanjenje zaduženja ({uklonjeneUtakmice.length} uklonjeno)</span>
+        <span className="font-mono text-[#C9A227]">-{cenaUklonjenihNakonPopusta.toFixed(2)} €</span>
+      </div>
+    )}
+    <p className="text-xs text-[#8B93A6] pt-1">Iznosi su izraženi po kursu iz trenutka prve kupovine.</p>
   </div>
-</div>
+) : (
+  <p className="text-[#8B93A6] text-sm border-t border-white/10 pt-4 mb-4">Nema izmena u sastavu karte.</p>
+)}
           {greska && <p className="text-red-400 text-xs mb-4">{greska}</p>}
 
-          <button onClick={sacuvajIzmene} disabled={odabraneUtakmice.length === 0}
+          <button onClick={sacuvajIzmene} disabled={odabraneUtakmice.length === 0 || !imaIzmena}
             className="bg-[#C9A227] text-[#0B1120] font-semibold px-7 py-3 rounded-sm hover:bg-[#dbb52f] transition-colors uppercase text-sm tracking-wide disabled:opacity-30 disabled:cursor-not-allowed">
             Sačuvaj izmene
           </button>

@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray,ne,sql } from 'drizzle-orm';
 import { DRIZZLE } from '../db/drizzle.provider';
 import { REDIS } from '../db/redis.provider';
 import * as schema from '../db/schema';
@@ -79,7 +79,37 @@ export class KartaService {
     if (noveUtakmice.length !== noveUtakmiceId.length) {
       throw new BadRequestException('Jedna ili više izabranih utakmica ne postoje.');
     }
+    const postojeceStavke = await this.db
+      .select()
+      .from(schema.stavkaKarte)
+      .where(eq(schema.stavkaKarte.idKarte, karta.idKarta));
+    const postojeciIds = postojeceStavke.map((s) => s.idUtakmice);
+    const dodateUtakmiceId = noveUtakmiceId.filter((id) => !postojeciIds.includes(id));
 
+    for (const idUtak of dodateUtakmiceId) {
+      const utakmica = noveUtakmice.find((u) => u.idUtakmica === idUtak)!;
+      const [stadion] = await this.db
+        .select()
+        .from(schema.stadion)
+        .where(eq(schema.stadion.idStadion, utakmica.idStadiona));
+
+      const [{ zauzeto }] = await this.db
+        .select({ zauzeto: sql<number>`count(*)` })
+        .from(schema.stavkaKarte)
+        .innerJoin(schema.karta, eq(schema.stavkaKarte.idKarte, schema.karta.idKarta))
+        .where(and(
+          eq(schema.stavkaKarte.idUtakmice, idUtak),
+          ne(schema.karta.status, 'otkazana'),
+        ));
+
+     if (Number(zauzeto) >= stadion.kapacitet) {
+  const [tim1] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, utakmica.tim1Id));
+  const [tim2] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, utakmica.tim2Id));
+  throw new BadRequestException(
+    `Nema slobodnih mesta za utakmicu ${tim1?.naziv ?? '?'} — ${tim2?.naziv ?? '?'}.`
+  );
+}
+    }
     const [prvenstvo] = await this.db.select().from(schema.prvenstvo).limit(1);
     const popustAktivan = prvenstvo?.datumPopustaDo
       ? new Date() <= new Date(prvenstvo.datumPopustaDo)

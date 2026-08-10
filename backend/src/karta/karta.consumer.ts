@@ -1,5 +1,5 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray,ne,sql,and } from 'drizzle-orm';
 import { DRIZZLE } from '../db/drizzle.provider';
 import { REDIS } from '../db/redis.provider';
 import * as schema from '../db/schema';
@@ -97,6 +97,34 @@ export class KartaConsumer implements OnModuleInit {
   await this.redis.xack(STREAM_KUPOVINE, GRUPA, idPoruke);
   return;
 }
+ for (const u of utakmice) {
+  const [stadion] = await this.db
+    .select()
+    .from(schema.stadion)
+    .where(eq(schema.stadion.idStadion, u.idStadiona));
+
+  const [{ zauzeto }] = await this.db
+    .select({ zauzeto: sql<number>`count(*)` })
+    .from(schema.stavkaKarte)
+    .innerJoin(schema.karta, eq(schema.stavkaKarte.idKarte, schema.karta.idKarta))
+    .where(and(
+      eq(schema.stavkaKarte.idUtakmice, u.idUtakmica),
+      ne(schema.karta.status, 'otkazana'),
+    ));
+
+  if (Number(zauzeto) >= stadion.kapacitet) {
+  const [tim1] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, u.tim1Id));
+  const [tim2] = await this.db.select().from(schema.tim).where(eq(schema.tim.idTim, u.tim2Id));
+  const nazivUtakmice = `${tim1?.naziv ?? '?'} — ${tim2?.naziv ?? '?'}`;
+
+  this.logger.error(`Poruka ${idPoruke}: nema slobodnih mesta za utakmicu ${nazivUtakmice}.`);
+  await this.redis.set(kljucStatusa(idPoruke), JSON.stringify({
+    status: 'greska',
+    poruka: `Nema slobodnih mesta za utakmicu ${nazivUtakmice}.`,
+  }), 'EX', 3600);
+  await this.redis.xack(STREAM_KUPOVINE, GRUPA, idPoruke);
+  return;
+}}
 
    try{ // 2. Proveri da li rani popust (10%) važi
     const [prvenstvo] = await this.db.select().from(schema.prvenstvo).limit(1);
