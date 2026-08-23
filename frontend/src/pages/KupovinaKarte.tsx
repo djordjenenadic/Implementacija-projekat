@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { dohvatiUtakmiceAdmin, dohvatiTimove, dohvatiValute, dohvatiPrvenstvo, kupiKartu, dohvatiStatusKupovine } from '../api'
+import { useEffect, useState, useRef } from 'react'
+import {proveriPromoKod, dohvatiUtakmiceAdmin, dohvatiTimove, dohvatiValute, dohvatiPrvenstvo, kupiKartu, dohvatiStatusKupovine } from '../api'
 import type { UtakmicaBackend, Tim, ValutaBackend, Prvenstvo } from '../types'
-
+import { useNavigate } from 'react-router-dom'
 type Korak = 'podaci' | 'utakmice' | 'pregled' | 'obrada' | 'gotovo' | 'greska'
 
 interface PodaciKupca {
@@ -20,6 +20,8 @@ const praznaForma: PodaciKupca = {
 }
 
 function KupovinaKarte() {
+  const intervalRef = useRef<number | null>(null)
+  const navigate = useNavigate()
   const [ucitavanje, setUcitavanje] = useState(true)//postavljanje pocetne vrednosti na true
   const [utakmice, setUtakmice] = useState<UtakmicaBackend[]>([])//postavljanje tipa podataka na UtakmiceBackedn i postavljanje poctene vrednosti [] 
   const [timovi, setTimovi] = useState<Tim[]>([]) //postavljanje pocetne vrendosti []
@@ -32,10 +34,12 @@ function KupovinaKarte() {
   const [promoKod, setPromoKod] = useState('')
   const [promoKodPrimenjen, setPromoKodPrimenjen] = useState(false)//promoKodPrimenjen na false kao podrzumevano
   const [valutaId, setValutaId] = useState<number | null>(null)
-  const [rezultat, setRezultat] = useState<{ sifra: string; noviPromoKod: string } | null>(null)
+  const [rezultat, setRezultat] = useState<{ sifra: string; noviPromoKod: string; ukupnaCena: string; valutaKod: string } | null>(null)
   const [porukaGreske, setPorukaGreske] = useState('')
 
   const [pretragaTima, setPretragaTima] = useState('')
+  const [proveravaPromoKod, setProveravaPromoKod] = useState(false)
+  const [greskaPromoKod, setGreskaPromoKod] = useState('')
 
   useEffect(() => {
     Promise.all([dohvatiUtakmiceAdmin(), dohvatiTimove(), dohvatiValute(), dohvatiPrvenstvo()])//pokretanje sva cetiri pziva istovremeno, i ceka da se sva zavrse
@@ -46,6 +50,11 @@ function KupovinaKarte() {
       .finally(() => setUcitavanje(false))//iyvrsava se uvek bey obyira da li je .then prosao uspseno ili ne
   }, [])
 
+ useEffect(() => {
+  return () => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+  }
+}, [])
   function nazivTima(id: number) {
     return timovi.find((t) => t.idTim === id)?.naziv ?? '—'
   }
@@ -71,41 +80,62 @@ function KupovinaKarte() {
 
   const izabranaValuta = valute.find((v) => v.idValute === valutaId)
 
-  function primeniPromoKod() {
-    if (promoKod.trim().length > 0) setPromoKodPrimenjen(true)
+  async function primeniPromoKod() {
+  if (!promoKod.trim()) return
+  setProveravaPromoKod(true)
+  setGreskaPromoKod('')
+  try {
+    await proveriPromoKod(promoKod.trim())
+    setPromoKodPrimenjen(true)
+  } catch (e) {
+    setGreskaPromoKod(e instanceof Error ? e.message : 'Promo kod nije validan.')
+  } finally {
+    setProveravaPromoKod(false)
   }
+}
 
   async function potvrdiKupovinu() {
-    if (!valutaId) return
-    setKorak('obrada')
+  if (!valutaId) return
+  setKorak('obrada')
 
-    const { idPoruke } = await kupiKartu({
-      ime: podaci.ime,
-      prezime: podaci.prezime,
-      adresa1: podaci.adresa1,
-      postanskiBroj: podaci.postanskiBroj,
-      mesto: podaci.mesto,
-      drzava: podaci.drzava,
-      email: podaci.email,
-      utakmiceId: odabraneUtakmice,
-      idValute: valutaId,
-      promoKodZaKoriscenje: promoKodPrimenjen ? promoKod : undefined,
-    })
+  const { idPoruke } = await kupiKartu({
+    ime: podaci.ime,
+    prezime: podaci.prezime,
+    adresa1: podaci.adresa1,
+    postanskiBroj: podaci.postanskiBroj,
+    mesto: podaci.mesto,
+    drzava: podaci.drzava,
+    email: podaci.email,
+    utakmiceId: odabraneUtakmice,
+    idValute: valutaId,
+    promoKodZaKoriscenje: promoKodPrimenjen ? promoKod : undefined,
+  })
 
-    const interval = setInterval(async () => {
-      const stanje = await dohvatiStatusKupovine(idPoruke)
-      if (stanje.status === 'gotovo') {
-        clearInterval(interval)
-        setRezultat({ sifra: stanje.sifra!, noviPromoKod: stanje.noviPromoKod! })
-        setKorak('gotovo')
-      } else if (stanje.status === 'greska') {
-        clearInterval(interval)
-        setPorukaGreske(stanje.poruka ?? 'Došlo je do greške.')
-        setKorak('greska')
-      }
-    }, 1000)
+  intervalRef.current = window.setInterval(async () => {
+    const stanje = await dohvatiStatusKupovine(idPoruke)
+    if (stanje.status === 'gotovo') {
+      clearInterval(intervalRef.current!)
+      intervalRef.current = null
+      setRezultat({
+        sifra: stanje.sifra!,
+        noviPromoKod: stanje.noviPromoKod!,
+        ukupnaCena: stanje.ukupnaCena!,
+        valutaKod: stanje.valutaKod!,
+      })
+      setKorak('gotovo')
+    } else if (stanje.status === 'greska') {
+      clearInterval(intervalRef.current!)
+      intervalRef.current = null
+      setPorukaGreske(stanje.poruka ?? 'Došlo je do greške.')
+      setKorak('greska')
+    }
+  }, 1000)
+}
+
+function nazadNaPocetnu() {
+if (intervalRef.current) clearInterval(intervalRef.current)
+    navigate('/')
   }
-
   const formaValidna =
     podaci.ime && podaci.prezime && podaci.adresa1 && podaci.postanskiBroj &&
     podaci.mesto && podaci.drzava && podaci.email && podaci.email === podaci.potvrdaEmail
@@ -205,12 +235,13 @@ function KupovinaKarte() {
             <div className="flex gap-2 mt-1">
               <input className="polje flex-1" placeholder="Unesi kod ako imaš" value={promoKod}
                 disabled={promoKodPrimenjen} onChange={(e) => setPromoKod(e.target.value)} />
-              <button onClick={primeniPromoKod} disabled={promoKodPrimenjen || !promoKod}
-                className="px-4 text-sm border border-white/20 rounded-sm hover:border-[#C9A227] disabled:opacity-30">
-                Primeni
-              </button>
+              <button onClick={primeniPromoKod} disabled={promoKodPrimenjen || !promoKod || proveravaPromoKod}
+  className="px-4 text-sm border border-white/20 rounded-sm hover:border-[#C9A227] disabled:opacity-30">
+  {proveravaPromoKod ? 'Proveravam...' : 'Primeni'}
+</button>
             </div>
-            {promoKodPrimenjen && <p className="text-[#C9A227] text-xs mt-1">Kod će biti proveren i primenjen prilikom obrade.</p>}
+            {promoKodPrimenjen && <p className="text-[#C9A227] text-xs mt-1">Kod je validan i biće primenjen.</p>}
+            {greskaPromoKod && <p className="text-red-400 text-xs mt-1">{greskaPromoKod}</p>}
           </div>
 
           <div>
@@ -266,6 +297,13 @@ function KupovinaKarte() {
           <p className="text-2xl font-mono mb-6">{rezultat.sifra}</p>
           <p className="text-sm text-[#8B93A6] mb-1">Tvoj promo kod za deljenje:</p>
           <p className="text-2xl font-mono text-[#C9A227]">{rezultat.noviPromoKod}</p>
+          <p className="text-sm text-[#8B93A6] mb-1">Plaćeno:</p>
+          <p className="text-2xl font-mono mb-6">{rezultat.ukupnaCena} {rezultat.valutaKod}</p>
+          <button onClick={nazadNaPocetnu}
+        className="px-6 py-3 text-sm text-[#8B93A6] hover:text-[#F4F1E9]">
+        Nazad na početnu
+      </button>
+          
         </div>
       )}
 
@@ -273,6 +311,14 @@ function KupovinaKarte() {
         <div className="bg-[#1A2332] border border-red-500/40 rounded-sm p-8 text-center">
           <p className="text-red-400 uppercase text-sm tracking-widest font-mono mb-2">Greška</p>
           <p className="text-sm text-[#8B93A6]">{porukaGreske}</p>
+          <button onClick={nazadNaPocetnu}
+        className="px-6 py-3 text-sm text-[#8B93A6] hover:text-[#F4F1E9]">
+        Nazad na početnu
+      </button>
+          <button onClick={() => {if (intervalRef.current) clearInterval(intervalRef.current); setKorak('utakmice') }}
+      className="bg-[#C9A227] text-[#0B1120] font-semibold px-7 py-3 rounded-sm hover:bg-[#dbb52f] transition-colors uppercase text-sm tracking-wide">
+      Nazad na izbor utakmica
+    </button>
         </div>
       )}
     </div>

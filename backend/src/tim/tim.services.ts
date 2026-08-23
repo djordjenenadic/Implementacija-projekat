@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject,BadRequestException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../db/drizzle.provider';
 import * as schema from '../db/schema';
@@ -15,9 +15,16 @@ export class TimService {
   }
 
   async dodaj(podaci: typeof schema.tim.$inferInsert) {
-    const [novi] = await this.db.insert(schema.tim).values(podaci).returning();
-    return novi;
+  const [postojeci] = await this.db.select().from(schema.tim)
+    .where(eq(schema.tim.naziv, podaci.naziv));
+
+  if (postojeci) {
+    throw new BadRequestException('Tim sa tim nazivom već postoji.');
   }
+
+  const [novi] = await this.db.insert(schema.tim).values(podaci).returning();
+  return novi;
+}
 
   async azuriraj(id: number, podaci: Partial<typeof schema.tim.$inferInsert>) {
     const [azurirano] = await this.db

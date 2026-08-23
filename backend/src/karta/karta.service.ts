@@ -38,6 +38,19 @@ export class KartaService {
     return JSON.parse(podaci);
   }
 
+  async proveriPromoKod(kod: string) {
+  const [promoKod] = await this.db.select().from(schema.promoKod)
+    .where(eq(schema.promoKod.kod, kod));
+
+  if (!promoKod) {
+    throw new NotFoundException('Promo kod ne postoji.');
+  }
+  if (promoKod.iskoriscen) {
+    throw new BadRequestException('Promo kod je već iskorišćen.');
+  }
+
+  return { vazi: true };
+}
   // --- FEATURE 4 i 5: zajednička pomoćna funkcija ---
   private async pronadjiKartuIliBaci(sifra: string, email: string) {
     const [karta] = await this.db
@@ -62,9 +75,9 @@ export class KartaService {
 
   // --- FEATURE 4: izmena karte ---
   async izmeniKartu(sifra: string, email: string, noveUtakmiceId: number[]) {
-    const karta = await this.pronadjiKartuIliBaci(sifra, email);
+    const karta = await this.pronadjiKartuIliBaci(sifra, email);//pronalazimo kartu na osovu sifre i email-a
 
-    if (karta.status === 'otkazana') {
+    if (karta.status === 'otkazana') {//ako je status pronadjene karte otkazana ona se ne moze menjati
       throw new BadRequestException('Otkazana karta se ne može menjati.');
     }
     if (noveUtakmiceId.length === 0) {

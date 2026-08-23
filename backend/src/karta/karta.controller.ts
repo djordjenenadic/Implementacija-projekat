@@ -11,6 +11,11 @@ export class KartaController {
     return this.kartaService.zapocniKupovinu(dto);
   }
 
+  @Get('promo-kod/:kod')
+  async proveriPromoKod(@Param('kod') kod: string) {
+    return this.kartaService.proveriPromoKod(kod);
+  }
+  
   @Get(':idPoruke/status')
   async proveriStatus(@Param('idPoruke') idPoruke: string) {
     return this.kartaService.dohvatiStatus(idPoruke);

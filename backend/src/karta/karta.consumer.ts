@@ -41,7 +41,7 @@ export class KartaConsumer implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      await this.redis.xgroup('CREATE', STREAM_KUPOVINE, GRUPA, '0', 'MKSTREAM');
+      await this.redis.xgroup('CREATE', STREAM_KUPOVINE, GRUPA, '0', 'MKSTREAM');//
       this.logger.log('Consumer grupa kreirana.');
     } catch (err: any) {
       if (!err.message.includes('BUSYGROUP')) throw err;
@@ -229,6 +229,8 @@ export class KartaConsumer implements OnModuleInit {
   sifra,
   noviPromoKod,
   idKarte: novaKarta.idKarta,
+  ukupnaCena: ukupnaCena.toFixed(2),
+  valutaKod: valuta.kod,
   
 }), 'EX', 3600);
 

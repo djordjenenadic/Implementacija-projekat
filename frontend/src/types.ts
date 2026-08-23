@@ -60,6 +60,8 @@ export interface KreirajKupovinuDto {
 export interface StatusKupovine {
   status: 'obrada' | 'gotovo' | 'greska' | 'nepoznato'
   sifra?: string
+  ukupnaCena?: string
+  valutaKod?: string
   noviPromoKod?: string
   poruka?: string
 }

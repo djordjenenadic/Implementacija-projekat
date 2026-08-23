@@ -71,7 +71,7 @@ function Administracija() {
 
   function pokaziPoruku(tekst: string) {
     setPoruka(tekst)
-    setTimeout(() => setPoruka(''), 2000)
+    setTimeout(() => setPoruka(''), 3000)
   }
 
   // --- PRVENSTVO ---
@@ -84,26 +84,38 @@ function Administracija() {
 
   // --- GRUPE / TIMOVI ---
   async function dodajNovuGrupu() {
-    if (!novaGrupaNaziv.trim() || !prvenstvo) return
+  if (!novaGrupaNaziv.trim() || !prvenstvo) return
+  try {
     const nova = await dodajGrupu({ naziv: novaGrupaNaziv, idPrvenstva: prvenstvo.idPrvenstva })
     setGrupe([...grupe, nova])
     setNovaGrupaNaziv('')
+  } catch (e) {
+    pokaziPoruku('Greska: '+(e instanceof Error ? e.message : 'Greška prilikom dodavanja grupe.'))
   }
+}
 
   async function dodajNoviTim(idGrupe: number) {
-    const naziv = noviTim[idGrupe]
-    if (!naziv?.trim()) return
+  const naziv = noviTim[idGrupe]
+  if (!naziv?.trim()) return
+  try {
     const novi = await dodajTim({ naziv, idGrupe })
     setTimovi([...timovi, novi])
     setNoviTim({ ...noviTim, [idGrupe]: '' })
+  } catch (e) {
+    pokaziPoruku('Greska: ' +(e instanceof Error ? e.message : 'Greška prilikom dodavanja tima.'))
   }
+}
 
   // --- STADIONI ---
   async function sacuvajStadion(s: Stadion) {
+  try {
     const { idStadion, ...podaci } = s
     await azurirajStadion(idStadion, podaci)
     pokaziPoruku('Izmene sačuvane.')
+  } catch (e) {
+    pokaziPoruku('Greska: ' + (e instanceof Error ? e.message : 'Greška prilikom čuvanja.'))
   }
+}
 
   function otvoriFormuZaNoviStadion() {
     setNoviStadion({ naziv: '', lokacija: '', kapacitet: '' })
@@ -114,11 +126,12 @@ function Administracija() {
   }
 
   async function potvrdiNoviStadion() {
-    if (!noviStadion) return
-    if (!noviStadion.naziv.trim() || !noviStadion.lokacija.trim() || !noviStadion.kapacitet) {
-      pokaziPoruku('Popuni sva polja.')
-      return
-    }
+  if (!noviStadion) return
+  if (!noviStadion.naziv.trim() || !noviStadion.lokacija.trim() || !noviStadion.kapacitet) {
+    pokaziPoruku('Popuni sva polja.')
+    return
+  }
+  try {
     const novi = await dodajStadion({
       naziv: noviStadion.naziv,
       lokacija: noviStadion.lokacija,
@@ -127,14 +140,21 @@ function Administracija() {
     setStadioni([...stadioni, novi])
     setNoviStadion(null)
     pokaziPoruku('Stadion dodat.')
+  } catch (e) {
+    pokaziPoruku('Greska: ' + (e instanceof Error ? e.message : 'Greška prilikom dodavanja stadiona.'))
   }
+}
 
   // --- UTAKMICE ---
-  async function sacuvajUtakmicu(u: UtakmicaBackend) {
+ async function sacuvajUtakmicu(u: UtakmicaBackend) {
+  try {
     const { idUtakmica, ...podaci } = u
     await azurirajUtakmicu(idUtakmica, podaci)
     pokaziPoruku('Izmene sačuvane.')
+  } catch (e) {
+    pokaziPoruku('Greska: ' + (e instanceof Error ? e.message : 'Greška prilikom čuvanja.'))
   }
+}
 
   function otvoriFormuZaNovuUtakmicu() {
     if (stadioni.length === 0 || timovi.length < 2) {
@@ -155,13 +175,17 @@ function Administracija() {
     setNovaUtakmica(null)
   }
 
-  async function potvrdiNovuUtakmicu() {
-    if (!novaUtakmica) return
+ async function potvrdiNovuUtakmicu() {
+  if (!novaUtakmica) return
+  try {
     const nova = await dodajUtakmicu(novaUtakmica)
     setUtakmice([...utakmice, nova])
     setNovaUtakmica(null)
     pokaziPoruku('Utakmica zakazana.')
+  } catch (e) {
+    pokaziPoruku('Greska: ' + (e instanceof Error ? e.message : 'Greška prilikom zakazivanja.'))
   }
+}
 
   // --- VALUTE ---
   async function preokreniValutu(v: ValutaBackend) {
@@ -460,7 +484,9 @@ function Administracija() {
         </div>
       )}
 
-      {poruka && <p className="text-[#C9A227] text-sm mt-6">{poruka}</p>}
+      {poruka && <p className={`text-sm mt-6 ${poruka.startsWith('Greska') ? 'text-red-400' : 'text-[#C9A227]'}`}>
+    {poruka}
+  </p>}
     </div>
   )
 }

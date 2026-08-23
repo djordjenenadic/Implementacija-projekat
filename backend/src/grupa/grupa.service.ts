@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { Injectable, Inject,BadRequestException } from '@nestjs/common';
+import { and,eq } from 'drizzle-orm';
 import { DRIZZLE } from '../db/drizzle.provider';
 import * as schema from '../db/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -26,10 +26,20 @@ export class GrupaService {
     return rezultat;
   }
 
-  async dodaj(podaci: typeof schema.grupa.$inferInsert) {
-    const [nova] = await this.db.insert(schema.grupa).values(podaci).returning();
-    return nova;
+ async dodaj(podaci: typeof schema.grupa.$inferInsert) {
+  const [postojeca] = await this.db.select().from(schema.grupa)
+    .where(and(
+      eq(schema.grupa.naziv, podaci.naziv),
+      eq(schema.grupa.idPrvenstva, podaci.idPrvenstva),
+    ));
+
+  if (postojeca) {
+    throw new BadRequestException('Grupa sa tim nazivom već postoji u okviru ovog prvenstva.');
   }
+
+  const [nova] = await this.db.insert(schema.grupa).values(podaci).returning();
+  return nova;
+}
 
   async azuriraj(id: number, podaci: Partial<typeof schema.grupa.$inferInsert>) {
     const [azurirano] = await this.db

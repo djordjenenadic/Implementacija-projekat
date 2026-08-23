@@ -14,6 +14,10 @@ async function post<T>(putanja: string, telo: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(telo),
   })
+  if (!odgovor.ok) {
+    const greska = await odgovor.json()
+    throw new Error(greska.message ?? 'Greška prilikom slanja podataka.')
+  }
   return odgovor.json()
 }
 
@@ -23,6 +27,10 @@ async function patch<T>(putanja: string, telo: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(telo),
   })
+  if (!odgovor.ok) {
+    const greska = await odgovor.json()
+    throw new Error(greska.message ?? 'Greška prilikom slanja podataka.')
+  }
   return odgovor.json()
 }
 
@@ -110,6 +118,15 @@ export async function otkaziKartu(sifra: string, email: string): Promise<KartaBa
   if (!odgovor.ok) {
     const greska = await odgovor.json()
     throw new Error(greska.message ?? 'Otkazivanje nije uspelo.')
+  }
+  return odgovor.json()
+}
+
+export async function proveriPromoKod(kod: string): Promise<{ vazi: true }> {
+  const odgovor = await fetch(`${API_URL}/karta/promo-kod/${encodeURIComponent(kod)}`)
+  if (!odgovor.ok) {
+    const greska = await odgovor.json()
+    throw new Error(greska.message ?? 'Promo kod nije validan.')
   }
   return odgovor.json()
 }
