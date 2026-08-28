@@ -315,10 +315,7 @@ if (intervalRef.current) clearInterval(intervalRef.current)
         className="px-6 py-3 text-sm text-[#8B93A6] hover:text-[#F4F1E9]">
         Nazad na početnu
       </button>
-          <button onClick={() => {if (intervalRef.current) clearInterval(intervalRef.current); setKorak('utakmice') }}
-      className="bg-[#C9A227] text-[#0B1120] font-semibold px-7 py-3 rounded-sm hover:bg-[#dbb52f] transition-colors uppercase text-sm tracking-wide">
-      Nazad na izbor utakmica
-    </button>
+          
         </div>
       )}
     </div>

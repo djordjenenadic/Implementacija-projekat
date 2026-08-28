@@ -1,10 +1,11 @@
 import type { Prvenstvo } from '../types'
-
+import { useNavigate } from 'react-router-dom'
 interface NaslovnaProps {
   prvenstvo: Prvenstvo
 }
 
 function Naslovna({ prvenstvo }: NaslovnaProps) {
+  const navigate = useNavigate()
   return (
     <header className="relative overflow-hidden border-b border-white/10">
       <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full border border-[#C9A227]/20 pointer-events-none" />
@@ -22,7 +23,7 @@ function Naslovna({ prvenstvo }: NaslovnaProps) {
           {prvenstvo.opis}
         </p>
 
-        <button className="mt-8 bg-[#C9A227] text-[#0B1120] font-semibold px-7 py-3 rounded-sm
+        <button onClick={() => navigate('/kupovina')} className="mt-8 bg-[#C9A227] text-[#0B1120] font-semibold px-7 py-3 rounded-sm
                      hover:bg-[#dbb52f] transition-colors uppercase text-sm tracking-wide">
           Kupi kartu
         </button>
